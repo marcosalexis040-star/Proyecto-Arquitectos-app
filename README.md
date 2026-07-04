@@ -49,7 +49,7 @@ npm start
 
 Por defecto el servidor corre en `http://localhost:3000` en **modo simulado** (`MOCK_CLAUDE=true`), por lo que no necesitas API key para probar la lógica.
 
-Al abrir `http://localhost:3000` en el navegador verás el **frontend web**: una interfaz minimalista (estética Vercel/Apple, en inglés para el mercado de EE. UU.) donde el arquitecto describe el espacio, genera la especificación y la copia al portapapeles. El Markdown se renderiza con `marked` y se sanea con `DOMPurify` antes de insertarse en el DOM; Tailwind CSS y la fuente Inter se cargan vía CDN.
+Al abrir `http://localhost:3000` en el navegador verás el **frontend web**: una interfaz minimalista (estética Vercel/Apple, en inglés para el mercado de EE. UU.) donde el arquitecto describe el espacio, genera la especificación, la copia al portapapeles o la **descarga como PDF** listo para imprimir (tamaño carta, con encabezado y fecha, vía `html2pdf.js`). El Markdown se renderiza con `marked` y se sanea con `DOMPurify` antes de insertarse en el DOM; Tailwind CSS y la fuente Inter se cargan vía CDN.
 
 Para conectar la API real de Claude, edita tu `.env`:
 
@@ -115,6 +115,7 @@ Ejecuta la suite con el runner nativo de Node (`node --test`) y `supertest`: val
 ## Roadmap (siguientes fases)
 
 - [x] Frontend web (Fase 2)
+- [x] Exportación a PDF (Fase 3)
 - [ ] Autenticación de usuarios y límites de uso
 - [ ] Persistencia de especificaciones generadas (base de datos)
-- [ ] Exportación a PDF/DOCX
+- [ ] Exportación a DOCX
