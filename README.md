@@ -23,6 +23,8 @@ Micro-SaaS para arquitectos: transforma descripciones casuales de espacios arqui
 │   │   └── mock.service.js        # Respuesta simulada con el mismo contrato de salida
 │   └── prompts/
 │       └── system-prompt.js       # Prompt de sistema especializado en CSI MasterFormat
+├── tests/
+│   └── api.test.js                # Pruebas del endpoint (node --test + supertest)
 ├── .env.example                   # Plantilla de variables de entorno
 └── package.json
 ```
@@ -96,6 +98,14 @@ curl -s http://localhost:3000/api/generate-spec \
 ### `GET /health`
 
 Devuelve el estado del servicio y si está en modo simulado.
+
+## Pruebas
+
+```bash
+npm test
+```
+
+Ejecuta la suite con el runner nativo de Node (`node --test`) y `supertest`: valida el contrato del endpoint (estructura Markdown/CSI de la respuesta), las reglas de validación del body y el manejo de errores, todo en modo simulado sin consumir la API.
 
 ## Roadmap (siguientes fases)
 
