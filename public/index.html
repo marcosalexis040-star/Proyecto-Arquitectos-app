@@ -25,6 +25,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2pdf.js@0.10.2/dist/html2pdf.bundle.min.js"></script>
 
   <style>
     ::selection { background: #111; color: #fff; }
@@ -113,16 +114,29 @@
           <span class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">CSI MasterFormat Specification</span>
           <span id="demo-badge" class="hidden text-[11px] font-medium uppercase tracking-widest text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">Demo mode</span>
         </div>
-        <button
-          id="copy-btn"
-          class="inline-flex items-center gap-2 text-sm font-medium border border-neutral-200 rounded-lg px-4 py-2 hover:bg-neutral-50 active:scale-[0.98] transition"
-        >
-          <svg id="copy-icon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="9" y="9" width="13" height="13" rx="2" />
-            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-          </svg>
-          <span id="copy-label">Copy to Clipboard</span>
-        </button>
+        <div class="flex items-center gap-2">
+          <button
+            id="copy-btn"
+            class="inline-flex items-center gap-2 text-sm font-medium border border-neutral-200 rounded-lg px-4 py-2 hover:bg-neutral-50 active:scale-[0.98] transition"
+          >
+            <svg id="copy-icon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+            <span id="copy-label">Copy to Clipboard</span>
+          </button>
+          <button
+            id="pdf-btn"
+            class="inline-flex items-center gap-2 text-sm font-medium bg-neutral-900 text-white rounded-lg px-4 py-2 hover:bg-neutral-700 active:scale-[0.98] transition disabled:opacity-40 disabled:hover:bg-neutral-900"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <path d="M7 10l5 5 5-5" />
+              <path d="M12 15V3" />
+            </svg>
+            <span id="pdf-label">Download PDF</span>
+          </button>
+        </div>
       </div>
       <article
         id="spec-output"

@@ -7,6 +7,8 @@ const specOutputEl = document.getElementById("spec-output");
 const demoBadgeEl = document.getElementById("demo-badge");
 const copyBtn = document.getElementById("copy-btn");
 const copyLabelEl = document.getElementById("copy-label");
+const pdfBtn = document.getElementById("pdf-btn");
+const pdfLabelEl = document.getElementById("pdf-label");
 
 // Markdown crudo de la última especificación, para "Copy to Clipboard"
 let rawMarkdown = "";
@@ -92,8 +94,63 @@ async function copyToClipboard() {
   }, 2000);
 }
 
+async function downloadPdf() {
+  if (!rawMarkdown || pdfBtn.disabled) return;
+
+  pdfBtn.disabled = true;
+  pdfLabelEl.textContent = "Preparing PDF...";
+
+  // Plantilla limpia para impresión: mismo contenido renderizado (clases prose
+  // de Tailwind incluidas), pero sin el fondo gris ni el borde de la tarjeta.
+  const doc = document.createElement("div");
+  doc.className = "prose prose-neutral max-w-none bg-white";
+  doc.style.width = "7.3in";
+  doc.style.fontSize = "11px";
+
+  const today = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  doc.innerHTML = `
+    <style>
+      h1, h2, h3 { page-break-after: avoid; }
+      table, tr, li, blockquote { page-break-inside: avoid; }
+    </style>
+    <div style="display:flex; justify-content:space-between; align-items:baseline; border-bottom:2px solid #171717; padding-bottom:8px; margin-bottom:20px;">
+      <span style="font-weight:700; letter-spacing:-0.01em;">Prompt-to-Spec <span style="color:#a3a3a3;">Pro</span></span>
+      <span style="font-size:10px; color:#737373; text-transform:uppercase; letter-spacing:0.1em;">CSI MasterFormat Specification &middot; ${today}</span>
+    </div>
+  `;
+  doc.insertAdjacentHTML("beforeend", DOMPurify.sanitize(specOutputEl.innerHTML));
+
+  const filename = `CSI-Specification-${new Date().toISOString().slice(0, 10)}.pdf`;
+
+  try {
+    await html2pdf()
+      .set({
+        margin: [0.6, 0.6, 0.7, 0.6],
+        filename,
+        image: { type: "jpeg", quality: 0.98 },
+        // scrollY: 0 evita que html2canvas desplace el lienzo cuando la página
+        // está scrolleada (deja franjas en blanco y corta el final del documento)
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff", scrollY: 0 },
+        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+        pagebreak: { mode: ["css", "legacy"] },
+      })
+      .from(doc)
+      .save();
+  } catch (err) {
+    showError(`Could not generate the PDF: ${err.message}`);
+  } finally {
+    pdfBtn.disabled = false;
+    pdfLabelEl.textContent = "Download PDF";
+  }
+}
+
 generateBtn.addEventListener("click", generateSpec);
 copyBtn.addEventListener("click", copyToClipboard);
+pdfBtn.addEventListener("click", downloadPdf);
 
 textarea.addEventListener("input", () => {
   generateBtn.disabled = textarea.value.trim().length === 0;
