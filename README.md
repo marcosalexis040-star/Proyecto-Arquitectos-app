@@ -23,8 +23,11 @@ Micro-SaaS para arquitectos: transforma descripciones casuales de espacios arqui
 │   │   └── mock.service.js        # Respuesta simulada con el mismo contrato de salida
 │   └── prompts/
 │       └── system-prompt.js       # Prompt de sistema especializado en CSI MasterFormat
+├── public/
+│   ├── index.html                 # Frontend: UI minimalista (Tailwind + Inter vía CDN)
+│   └── app.js                     # Lógica del frontend: fetch, loading, render Markdown, copy
 ├── tests/
-│   └── api.test.js                # Pruebas del endpoint (node --test + supertest)
+│   └── api.test.js                # Pruebas del endpoint y del frontend estático
 ├── .env.example                   # Plantilla de variables de entorno
 └── package.json
 ```
@@ -45,6 +48,8 @@ npm start
 ```
 
 Por defecto el servidor corre en `http://localhost:3000` en **modo simulado** (`MOCK_CLAUDE=true`), por lo que no necesitas API key para probar la lógica.
+
+Al abrir `http://localhost:3000` en el navegador verás el **frontend web**: una interfaz minimalista (estética Vercel/Apple, en inglés para el mercado de EE. UU.) donde el arquitecto describe el espacio, genera la especificación y la copia al portapapeles. El Markdown se renderiza con `marked` y se sanea con `DOMPurify` antes de insertarse en el DOM; Tailwind CSS y la fuente Inter se cargan vía CDN.
 
 Para conectar la API real de Claude, edita tu `.env`:
 
@@ -109,7 +114,7 @@ Ejecuta la suite con el runner nativo de Node (`node --test`) y `supertest`: val
 
 ## Roadmap (siguientes fases)
 
+- [x] Frontend web (Fase 2)
 - [ ] Autenticación de usuarios y límites de uso
 - [ ] Persistencia de especificaciones generadas (base de datos)
 - [ ] Exportación a PDF/DOCX
-- [ ] Frontend web

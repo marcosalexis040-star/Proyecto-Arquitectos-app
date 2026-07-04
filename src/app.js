@@ -1,11 +1,19 @@
 import express from "express";
 import cors from "cors";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import specRoutes from "./routes/spec.routes.js";
+
+// __dirname no existe en ES modules; se deriva de import.meta.url
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: "100kb" }));
+
+// Frontend estático (public/index.html se sirve en la raíz "/")
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.get("/health", (_req, res) => {
   res.json({

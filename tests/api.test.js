@@ -92,3 +92,19 @@ describe("rutas no definidas", () => {
     assert.equal(res.body.success, false);
   });
 });
+
+describe("frontend estático", () => {
+  test("GET / sirve el index.html de la aplicación", async () => {
+    const res = await request(app).get("/");
+    assert.equal(res.status, 200);
+    assert.match(res.headers["content-type"], /text\/html/);
+    assert.match(res.text, /Prompt-to-Spec/);
+    assert.match(res.text, /Generate CSI Specifications/);
+  });
+
+  test("GET /app.js sirve el JavaScript del frontend", async () => {
+    const res = await request(app).get("/app.js");
+    assert.equal(res.status, 200);
+    assert.match(res.text, /generate-spec/);
+  });
+});

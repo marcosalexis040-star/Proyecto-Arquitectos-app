@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prompt-to-Spec Pro — CSI Specifications from Plain English</title>
+  <meta name="description" content="Turn plain-English design descriptions into CSI MasterFormat construction specifications — materials, execution, and quality control in seconds." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ["Inter", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
+          },
+        },
+      },
+    };
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked@12.0.2/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
+
+  <style>
+    ::selection { background: #111; color: #fff; }
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+
+<body class="bg-white text-neutral-900 antialiased font-sans min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-20 backdrop-blur-md bg-white/80 border-b border-neutral-200/80">
+    <div class="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-6 h-6 bg-neutral-900 rounded-md flex items-center justify-center">
+          <svg class="w-3.5 h-3.5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3 L21 8 L12 13 L3 8 Z" />
+            <path d="M3 16 L12 21 L21 16" />
+          </svg>
+        </div>
+        <span class="font-semibold tracking-tight text-[15px]">Prompt-to-Spec <span class="text-neutral-400 font-medium">Pro</span></span>
+      </div>
+      <span class="text-[11px] font-medium uppercase tracking-widest text-neutral-400 border border-neutral-200 rounded-full px-2.5 py-0.5">Beta</span>
+    </div>
+  </header>
+
+  <main class="flex-1 w-full max-w-3xl mx-auto px-6">
+
+    <!-- Hero -->
+    <section class="pt-16 pb-10 text-center">
+      <h1 class="text-4xl md:text-5xl font-bold tracking-tight leading-[1.1]">
+        Describe the space.<br />
+        <span class="text-neutral-400">Get the spec.</span>
+      </h1>
+      <p class="mt-5 text-neutral-500 text-lg leading-relaxed max-w-xl mx-auto">
+        Turn plain-English design descriptions into CSI MasterFormat construction
+        specifications — materials, execution, and quality control in seconds.
+      </p>
+    </section>
+
+    <!-- Input card -->
+    <section class="rounded-2xl border border-neutral-200 shadow-sm shadow-neutral-100 focus-within:border-neutral-400 transition-colors bg-white">
+      <label for="description" class="sr-only">Describe your architectural space</label>
+      <textarea
+        id="description"
+        rows="5"
+        maxlength="2000"
+        class="w-full resize-none rounded-2xl bg-transparent p-5 text-base leading-relaxed outline-none placeholder:text-neutral-400"
+        placeholder="e.g. A modern residential kitchen with honed Carrara marble countertops, wide-plank white oak flooring, custom walnut cabinetry, and brushed brass fixtures under recessed LED lighting."
+      ></textarea>
+      <div class="flex items-center justify-between px-5 pb-4">
+        <span class="text-xs text-neutral-400 hidden sm:block">
+          <kbd class="font-sans border border-neutral-200 rounded px-1.5 py-0.5">⌘</kbd>
+          +
+          <kbd class="font-sans border border-neutral-200 rounded px-1.5 py-0.5">Enter</kbd>
+          to generate
+        </span>
+        <button
+          id="generate-btn"
+          disabled
+          class="inline-flex items-center gap-2 bg-neutral-900 text-white text-sm font-medium rounded-lg px-5 py-2.5 hover:bg-neutral-700 active:scale-[0.98] transition disabled:opacity-40 disabled:hover:bg-neutral-900 disabled:active:scale-100"
+        >
+          Generate CSI Specifications
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M13 6l6 6-6 6" />
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- Loading state -->
+    <div id="loading" class="hidden mt-8 flex items-center justify-center gap-3 text-neutral-400 text-sm">
+      <svg class="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+      </svg>
+      <span class="animate-pulse">Analyzing design and generating CSI specs...</span>
+    </div>
+
+    <!-- Error state -->
+    <div id="error" class="hidden mt-8 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm px-4 py-3"></div>
+
+    <!-- Results -->
+    <section id="result" class="hidden mt-12 mb-8 scroll-mt-20">
+      <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
+        <div class="flex items-center gap-3">
+          <span class="text-[11px] font-semibold uppercase tracking-widest text-neutral-400">CSI MasterFormat Specification</span>
+          <span id="demo-badge" class="hidden text-[11px] font-medium uppercase tracking-widest text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">Demo mode</span>
+        </div>
+        <button
+          id="copy-btn"
+          class="inline-flex items-center gap-2 text-sm font-medium border border-neutral-200 rounded-lg px-4 py-2 hover:bg-neutral-50 active:scale-[0.98] transition"
+        >
+          <svg id="copy-icon" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          <span id="copy-label">Copy to Clipboard</span>
+        </button>
+      </div>
+      <article
+        id="spec-output"
+        class="prose prose-neutral max-w-none rounded-2xl border border-neutral-200 bg-neutral-50/50 px-8 py-6 prose-headings:tracking-tight prose-h1:text-2xl prose-h2:text-xl prose-table:text-sm prose-th:text-left"
+      ></article>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-neutral-200/80 mt-16 py-8 text-center text-sm text-neutral-400">
+    Prompt-to-Spec Pro — Built for architects. Powered by Claude.
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
