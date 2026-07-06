@@ -112,6 +112,19 @@ npm test
 
 Ejecuta la suite con el runner nativo de Node (`node --test`) y `supertest`: valida el contrato del endpoint (estructura Markdown/CSI de la respuesta), las reglas de validación del body y el manejo de errores, todo en modo simulado sin consumir la API.
 
+## Despliegue en Render
+
+El repo incluye un blueprint (`render.yaml`) para desplegar con un clic:
+
+1. Crea una cuenta en [render.com](https://render.com) (puedes entrar con tu cuenta de GitHub).
+2. En el dashboard: **New +** → **Blueprint** → conecta el repositorio `Proyecto-Arquitectos-app`.
+3. Render lee `render.yaml` y crea el Web Service `prompt-to-spec-pro` (plan free). Cuando pregunte por `ANTHROPIC_API_KEY`, puedes dejarla vacía: la demo corre en modo simulado (`MOCK_CLAUDE=true`).
+4. Al terminar el deploy tendrás una URL pública tipo `https://prompt-to-spec-pro.onrender.com`.
+
+Para pasar del demo a la API real: en el dashboard del servicio → **Environment**, define `ANTHROPIC_API_KEY` y cambia `MOCK_CLAUDE` a `false`.
+
+> Nota del plan free: el servicio se "duerme" tras ~15 minutos sin tráfico; la primera visita después de eso tarda ~30–60 s en despertar.
+
 ## Roadmap (siguientes fases)
 
 - [x] Frontend web (Fase 2)
