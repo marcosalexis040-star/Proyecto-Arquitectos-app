@@ -3,6 +3,7 @@ import cors from "cors";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import specRoutes from "./routes/spec.routes.js";
+import { getProvider } from "./services/provider.js";
 
 // __dirname no existe en ES modules; se deriva de import.meta.url
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -16,10 +17,12 @@ app.use(express.json({ limit: "100kb" }));
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 app.get("/health", (_req, res) => {
+  const provider = getProvider();
   res.json({
     status: "ok",
     service: "prompt-to-spec-backend",
-    mockMode: process.env.MOCK_CLAUDE !== "false" || !process.env.ANTHROPIC_API_KEY,
+    mockMode: provider === "mock",
+    provider,
   });
 });
 

@@ -12,6 +12,7 @@ describe("GET /health", () => {
     assert.equal(res.status, 200);
     assert.equal(res.body.status, "ok");
     assert.equal(res.body.mockMode, true);
+    assert.equal(res.body.provider, "mock");
   });
 });
 

@@ -1,11 +1,9 @@
 import { generateSpecWithClaude, mapAnthropicError } from "../services/claude.service.js";
+import { generateSpecWithOpenRouter, mapOpenRouterError } from "../services/openrouter.service.js";
 import { generateSpecMock } from "../services/mock.service.js";
+import { getProvider } from "../services/provider.js";
 
 const MAX_DESCRIPTION_LENGTH = 2000;
-
-function isMockEnabled() {
-  return process.env.MOCK_CLAUDE !== "false" || !process.env.ANTHROPIC_API_KEY;
-}
 
 /**
  * POST /api/generate-spec
@@ -29,12 +27,18 @@ export async function generateSpec(req, res) {
   }
 
   const cleanDescription = description.trim();
-  const mocked = isMockEnabled();
+  const provider = getProvider();
+  const mocked = provider === "mock";
 
   try {
-    const result = mocked
-      ? generateSpecMock(cleanDescription)
-      : await generateSpecWithClaude(cleanDescription);
+    let result;
+    if (provider === "openrouter") {
+      result = await generateSpecWithOpenRouter(cleanDescription);
+    } else if (provider === "anthropic") {
+      result = await generateSpecWithClaude(cleanDescription);
+    } else {
+      result = generateSpecMock(cleanDescription);
+    }
 
     return res.status(200).json({
       success: true,
@@ -45,6 +49,7 @@ export async function generateSpec(req, res) {
       },
       meta: {
         mocked,
+        provider,
         model: result.model,
         usage: result.usage,
         input: cleanDescription,
@@ -52,9 +57,11 @@ export async function generateSpec(req, res) {
       },
     });
   } catch (error) {
-    const apiError = mapAnthropicError(error);
+    const apiError =
+      provider === "openrouter" ? mapOpenRouterError(error) : mapAnthropicError(error);
+
     if (apiError) {
-      console.error(`[generate-spec] Error de la API de Claude: ${error.message}`);
+      console.error(`[generate-spec] Error de ${provider}: ${error.message}`);
       return res.status(apiError.status).json({ success: false, error: apiError.message });
     }
 

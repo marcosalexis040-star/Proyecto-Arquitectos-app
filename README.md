@@ -5,8 +5,8 @@ Micro-SaaS para arquitectos: transforma descripciones casuales de espacios arqui
 ## Stack
 
 - Node.js (≥ 18) + Express
-- SDK oficial `@anthropic-ai/sdk` (modelo `claude-opus-4-8`)
-- Modo simulado (mock) para desarrollar sin consumir la API
+- SDK oficial `@anthropic-ai/sdk` (modelo `claude-opus-4-8`), con **OpenRouter** como proveedor alternativo
+- Modo simulado (mock) para desarrollar sin consumir ninguna API
 
 ## Estructura del proyecto
 
@@ -19,7 +19,9 @@ Micro-SaaS para arquitectos: transforma descripciones casuales de espacios arqui
 │   ├── controllers/
 │   │   └── spec.controller.js     # Validación del body y orquestación mock/real
 │   ├── services/
-│   │   ├── claude.service.js      # Cliente de la API de Claude (streaming + errores tipados)
+│   │   ├── provider.js            # Decide qué proveedor usar (mock/anthropic/openrouter)
+│   │   ├── claude.service.js      # Cliente de la API directa de Anthropic (streaming + errores tipados)
+│   │   ├── openrouter.service.js  # Cliente alternativo vía OpenRouter (fetch nativo, sin SDK extra)
 │   │   └── mock.service.js        # Respuesta simulada con el mismo contrato de salida
 │   └── prompts/
 │       └── system-prompt.js       # Prompt de sistema especializado en CSI MasterFormat
@@ -51,12 +53,24 @@ Por defecto el servidor corre en `http://localhost:3000` en **modo simulado** (`
 
 Al abrir `http://localhost:3000` en el navegador verás el **frontend web**: una interfaz minimalista (estética Vercel/Apple, en inglés para el mercado de EE. UU.) donde el arquitecto describe el espacio, genera la especificación, la copia al portapapeles o la **descarga como PDF** listo para imprimir (tamaño carta, con encabezado y fecha, vía `html2pdf.js`). El Markdown se renderiza con `marked` y se sanea con `DOMPurify` antes de insertarse en el DOM; Tailwind CSS y la fuente Inter se cargan vía CDN.
 
-Para conectar la API real de Claude, edita tu `.env`:
+Para generar especificaciones reales, edita tu `.env` y elige **una** de las dos opciones (con `MOCK_CLAUDE=false` en ambos casos):
 
+**Opción A — API directa de Anthropic** ([platform.claude.com](https://platform.claude.com)):
 ```
-ANTHROPIC_API_KEY=sk-ant-...
 MOCK_CLAUDE=false
+ANTHROPIC_API_KEY=sk-ant-...
 ```
+
+**Opción B — OpenRouter** ([openrouter.ai](https://openrouter.ai)), si ya tienes crédito ahí:
+```
+MOCK_CLAUDE=false
+OPENROUTER_API_KEY=sk-or-...
+OPENROUTER_MODEL=anthropic/claude-3.5-sonnet   # opcional; ver nota abajo
+```
+
+Si defines ambas keys, **OpenRouter tiene prioridad**. `OPENROUTER_MODEL` acepta el *slug* exacto de cualquier modelo listado en [openrouter.ai/models](https://openrouter.ai/models) — no solo Claude; cópialo tal cual aparece ahí, un valor inventado responde 400.
+
+También puedes forzar explícitamente un proveedor con `AI_PROVIDER=anthropic|openrouter|mock`, ignorando la lógica automática basada en qué keys estén presentes.
 
 ## API
 
@@ -82,6 +96,7 @@ MOCK_CLAUDE=false
   },
   "meta": {
     "mocked": true,
+    "provider": "mock",
     "model": "mock",
     "usage": null,
     "input": "Cocina moderna con barras de mármol y pisos de madera",
@@ -90,7 +105,7 @@ MOCK_CLAUDE=false
 }
 ```
 
-**Errores:** `400` (description ausente, vacía, demasiado larga o JSON inválido), `502/503` (fallos de la API de Claude), `500` (error interno).
+**Errores:** `400` (description ausente, vacía, demasiado larga o JSON inválido), `502/503/504` (fallos del proveedor de IA elegido), `500` (error interno).
 
 **Prueba rápida con curl:**
 
@@ -102,7 +117,7 @@ curl -s http://localhost:3000/api/generate-spec \
 
 ### `GET /health`
 
-Devuelve el estado del servicio y si está en modo simulado.
+Devuelve el estado del servicio, si está en modo simulado y qué `provider` está activo (`"mock" | "anthropic" | "openrouter"`).
 
 ## Pruebas
 
@@ -118,10 +133,10 @@ El repo incluye un blueprint (`render.yaml`) para desplegar con un clic:
 
 1. Crea una cuenta en [render.com](https://render.com) (puedes entrar con tu cuenta de GitHub).
 2. En el dashboard: **New +** → **Blueprint** → conecta el repositorio `Proyecto-Arquitectos-app`.
-3. Render lee `render.yaml` y crea el Web Service `prompt-to-spec-pro` (plan free). Cuando pregunte por `ANTHROPIC_API_KEY`, puedes dejarla vacía: la demo corre en modo simulado (`MOCK_CLAUDE=true`).
+3. Render lee `render.yaml` y crea el Web Service `prompt-to-spec-pro` (plan free). Cuando pregunte por las keys, puedes dejarlas vacías: la demo corre en modo simulado (`MOCK_CLAUDE=true`).
 4. Al terminar el deploy tendrás una URL pública tipo `https://prompt-to-spec-pro.onrender.com`.
 
-Para pasar del demo a la API real: en el dashboard del servicio → **Environment**, define `ANTHROPIC_API_KEY` y cambia `MOCK_CLAUDE` a `false`.
+Para pasar del demo a especificaciones reales: en el dashboard del servicio → **Environment**, cambia `MOCK_CLAUDE` a `false` y define **una** de las dos keys (ver "Opción A / Opción B" arriba). **Nunca pegues una API key directamente en `render.yaml` ni la subas a GitHub** — siempre se define ahí, en el dashboard, donde queda cifrada y fuera del repositorio.
 
 > Nota del plan free: el servicio se "duerme" tras ~15 minutos sin tráfico; la primera visita después de eso tarda ~30–60 s en despertar.
 

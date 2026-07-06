@@ -11,14 +11,24 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      # Modo demo por defecto: la app funciona gratis sin API key.
-      # Para activar la API real de Claude, cambia MOCK_CLAUDE a "false"
-      # y define ANTHROPIC_API_KEY en el dashboard.
+      # Modo demo por defecto: la app funciona gratis sin ninguna API key.
+      # Para generar specs reales, cambia MOCK_CLAUDE a "false" en el
+      # dashboard y define UNA de las dos keys de abajo (no ambas necesarias).
       - key: MOCK_CLAUDE
         value: "true"
       # sync: false = el valor NO vive en el repo; Render lo pide/gestiona
-      # en el dashboard. Déjalo vacío mientras MOCK_CLAUDE sea "true".
+      # en el dashboard. Déjalas vacías mientras MOCK_CLAUDE sea "true".
+      #
+      # Opción A — API directa de Anthropic (platform.claude.com):
       - key: ANTHROPIC_API_KEY
+        sync: false
+      # Opción B — OpenRouter (openrouter.ai), útil si ya tienes crédito ahí.
+      # Si defines OPENROUTER_API_KEY tiene prioridad sobre ANTHROPIC_API_KEY.
+      - key: OPENROUTER_API_KEY
+        sync: false
+      # Slug exacto del modelo en OpenRouter (ver https://openrouter.ai/models).
+      # Solo aplica si usas la Opción B; opcional, tiene un valor por defecto.
+      - key: OPENROUTER_MODEL
         sync: false
     # PORT no se declara: Render lo inyecta automáticamente y
     # src/server.js ya lo lee con process.env.PORT.
